@@ -14,4 +14,26 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>src/img/Repartidor abajo.jpg</name>
+			<type>1</type>
+			<location>C:/Users/cober/eclipse-workspace/deambrosi-navarro-cober-tp-p1/src/img/Repartidor abajo.jpg</location>
+		</link>
+		<link>
+			<name>src/img/Repartidor arriba.jpg</name>
+			<type>1</type>
+			<location>C:/Users/cober/eclipse-workspace/deambrosi-navarro-cober-tp-p1/src/img/Repartidor arriba.jpg</location>
+		</link>
+		<link>
+			<name>src/img/Repartidor derecha.jpg</name>
+			<type>1</type>
+			<location>C:/Users/cober/eclipse-workspace/deambrosi-navarro-cober-tp-p1/src/img/Repartidor derecha.jpg</location>
+		</link>
+		<link>
+			<name>src/img/Repartidor izquierda.jpg</name>
+			<type>1</type>
+			<location>C:/Users/cober/eclipse-workspace/deambrosi-navarro-cober-tp-p1/src/img/Repartidor izquierda.jpg</location>
+		</link>
+	</linkedResources>
 </projectDescription>

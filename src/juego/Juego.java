@@ -10,15 +10,15 @@ public class Juego extends InterfaceJuego
 	// El objeto Entorno que controla el tiempo y otros
 	private Entorno entorno;
 	private Jugador jugador;
-	private Cuadra cuadra;
+	private Mapa Mapa;
 	// Variables y métodos propios de cada grupo
 	// ...
 	Juego()
 	{
 		// Inicializa el objeto entorno
 		this.entorno = new Entorno(this, "Proyecto para TP", 800, 600);
-		jugador = new Jugador(400,500);
-		cuadra = new Cuadra(150,150,100,100);
+		Mapa = new Mapa();
+		jugador = new Jugador(370,510);
 		// Inicializar lo que haga falta para el juego
 		// ...
 
@@ -34,34 +34,34 @@ public class Juego extends InterfaceJuego
 	 */
 	public void tick()
 	{
+		Mapa.dibujar(entorno);
 		jugador.dibujar(entorno);
-		cuadra.dibujarCuadra(entorno);
 		
-		if(entorno.estaPresionada('w') && jugador.bordeSuperior()>=0 && !jugador.colisionaCon(cuadra)) {
+		if(entorno.estaPresionada('w') && jugador.bordeSuperior()>=0 && !Mapa.colisionaCon(jugador)) {
 			jugador.cambiarDireccion('w');
 			jugador.moverArriba();
-			if(jugador.colisionaCon(cuadra)) {
+			if(Mapa.colisionaCon(jugador)) {
 				jugador.moverAbajo();
 			}
 		}
-		if (entorno.estaPresionada('s') && jugador.bordeInferior()<=entorno.alto() && !jugador.colisionaCon(cuadra)) {
+		if (entorno.estaPresionada('s') && jugador.bordeInferior()<=entorno.alto() && !Mapa.colisionaCon(jugador)) {
 			jugador.cambiarDireccion('s');
 			jugador.moverAbajo();
-			if(jugador.colisionaCon(cuadra)) {
+			if(Mapa.colisionaCon(jugador)) {
 				jugador.moverArriba();
 			}
 		}
 		if (entorno.estaPresionada('d') && jugador.bordeDerecho()<=entorno.ancho()) {
 			jugador.cambiarDireccion('d');
 			jugador.moverDerecha();
-			if(jugador.colisionaCon(cuadra)) {
+			if(Mapa.colisionaCon(jugador)) {
 				jugador.moverIzquierda();
 			}
 		}
-		if(entorno.estaPresionada('a')&& jugador.bordeIzquierdo()>=0 && !jugador.colisionaCon(cuadra)) {
+		if(entorno.estaPresionada('a')&& jugador.bordeIzquierdo()>=0 && !Mapa.colisionaCon(jugador)) {
 			jugador.cambiarDireccion('a');
 			jugador.moverIzquierda();
-			if(jugador.colisionaCon(cuadra)) {
+			if(Mapa.colisionaCon(jugador)) {
 				jugador.moverDerecha();
 			}
 		}

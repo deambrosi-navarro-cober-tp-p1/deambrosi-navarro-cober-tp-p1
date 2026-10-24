@@ -16,8 +16,8 @@ public class Jugador {
 	public Jugador(double x,double y) {
 		this.x=x;
 		this.y=y;
-		this.ancho = 35;
-		this.alto = 35;
+		this.ancho = 40;
+		this.alto = 40;
 		this.arriba=Herramientas.cargarImagen("img/Repartidor arriba.jpg");
 		this.abajo=Herramientas.cargarImagen("img/Repartidor abajo.jpg");
 		this.derecha=Herramientas.cargarImagen("img/Repartidor derecha.jpg");
@@ -30,13 +30,13 @@ public class Jugador {
 	
 	public void dibujar(Entorno e) {
 		if (direccion == 'w') {
-			e.dibujarImagen(arriba, this.x, this.y, 0, 0.10);
+			e.dibujarImagen(arriba, this.x, this.y, 0, 0.12);
 		}else if (direccion == 's'){
-			e.dibujarImagen(abajo, this.x, this.y, 0, 0.10);
+			e.dibujarImagen(abajo, this.x, this.y, 0, 0.12);
 		}else if (direccion == 'a') {
-			e.dibujarImagen(izquierda, this.x, this.y, 0, 0.10);
+			e.dibujarImagen(izquierda, this.x, this.y, 0, 0.12);
 		}else if(direccion == 'd') {
-			e.dibujarImagen(derecha, this.x, this.y, 0, 0.10);
+			e.dibujarImagen(derecha, this.x, this.y, 0, 0.12);
 		}
 	}
 	
@@ -81,4 +81,5 @@ public class Jugador {
 		}
 		return true;
 	}
+
 }
