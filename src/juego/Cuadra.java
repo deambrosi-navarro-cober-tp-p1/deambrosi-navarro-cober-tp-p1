@@ -3,14 +3,12 @@ package juego;
 import entorno.Entorno;
 import java.awt.Color;
 
-
 public class Cuadra {
 	private int x;
 	private int y;
 	private int ancho;
 	private int alto;
 
-	
 	public Cuadra(int x, int y, int ancho, int alto) {
 		this.x=x;
 		this.y=y;
@@ -19,7 +17,7 @@ public class Cuadra {
 	}
 	
 	public void dibujarCuadra(Entorno e) {
-		e.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, Color.GRAY);
+		e.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, new Color(105, 135, 85));
 	}
 	
 	public int bordeSuperior() {

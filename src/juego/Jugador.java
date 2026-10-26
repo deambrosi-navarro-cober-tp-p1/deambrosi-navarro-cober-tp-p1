@@ -2,6 +2,9 @@ package juego;
 import entorno.Entorno;
 import entorno.Herramientas;
 import java.awt.Image;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 public class Jugador {
 	private double x;
@@ -13,15 +16,20 @@ public class Jugador {
 	private Image derecha;
 	private Image izquierda;
 	private char direccion= 'w';
+	
 	public Jugador(double x,double y) {
 		this.x=x;
 		this.y=y;
 		this.ancho = 40;
 		this.alto = 40;
-		this.arriba=Herramientas.cargarImagen("img/Repartidor arriba.jpg");
-		this.abajo=Herramientas.cargarImagen("img/Repartidor abajo.jpg");
-		this.derecha=Herramientas.cargarImagen("img/Repartidor derecha.jpg");
-		this.izquierda=Herramientas.cargarImagen("img/Repartidor izquierda.jpg");
+		try {
+		    this.arriba = ImageIO.read(new File("src/img/Repartidor arriba.png"));
+		    this.abajo = ImageIO.read(new File("src/img/Repartidor abajo.png"));
+		    this.derecha = ImageIO.read(new File("src/img/Repartidor derecha.png"));
+		    this.izquierda = ImageIO.read(new File("src/img/Repartidor izquierda.png"));
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
 }
 	
 	public void cambiarDireccion(char nuevaDireccion) {
@@ -30,27 +38,27 @@ public class Jugador {
 	
 	public void dibujar(Entorno e) {
 		if (direccion == 'w') {
-			e.dibujarImagen(arriba, this.x, this.y, 0, 0.12);
+			e.dibujarImagen(arriba, this.x, this.y, 0, 0.036);
 		}else if (direccion == 's'){
-			e.dibujarImagen(abajo, this.x, this.y, 0, 0.12);
+			e.dibujarImagen(abajo, this.x, this.y, 0, 0.036);
 		}else if (direccion == 'a') {
-			e.dibujarImagen(izquierda, this.x, this.y, 0, 0.12);
+			e.dibujarImagen(izquierda, this.x, this.y, 0, 0.036);
 		}else if(direccion == 'd') {
-			e.dibujarImagen(derecha, this.x, this.y, 0, 0.12);
+			e.dibujarImagen(derecha, this.x, this.y, 0, 0.036);
 		}
 	}
 	
 	public void moverDerecha() {
-		this.x=this.x+4;
+		this.x=this.x+3;
 	}
 	public void moverIzquierda() {
-		this.x=this.x-4;
+		this.x=this.x-3;
 	}
 	public void moverArriba() {
-		this.y=this.y-4;
+		this.y=this.y-3;
 	}
 	public void moverAbajo() {
-		this.y=this.y+4;
+		this.y=this.y+3;
 	}
 	
 	public double bordeSuperior() {
@@ -81,5 +89,4 @@ public class Jugador {
 		}
 		return true;
 	}
-
 }

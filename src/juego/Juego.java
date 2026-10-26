@@ -1,7 +1,6 @@
 package juego;
 
 import java.awt.Color;
-
 import entorno.Entorno;
 import entorno.InterfaceJuego;
 
@@ -17,15 +16,13 @@ public class Juego extends InterfaceJuego
 	{
 		// Inicializa el objeto entorno
 		this.entorno = new Entorno(this, "Proyecto para TP", 800, 600);
-		Mapa = new Mapa();
-		jugador = new Jugador(370,510);
 		// Inicializar lo que haga falta para el juego
 		// ...
-
+		Mapa = new Mapa();
+		jugador = new Jugador(400,500);
 		// Inicia el juego!
 		this.entorno.iniciar();
 	}
-
 	/**
 	 * Durante el juego, el método tick() será ejecutado en cada instante y 
 	 * por lo tanto es el método más importante de esta clase. Aquí se debe 
@@ -34,6 +31,7 @@ public class Juego extends InterfaceJuego
 	 */
 	public void tick()
 	{
+		Mapa.dibujarFondo(entorno);
 		Mapa.dibujar(entorno);
 		jugador.dibujar(entorno);
 		
