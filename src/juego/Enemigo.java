@@ -14,6 +14,8 @@ public class Enemigo {
     private double ancho;
     private double alto;
     private Image imagen;
+    private long momentoUltimaBomba = 0;
+    private long intervaloBombas = 4000;
 
     // 0 = derecha, 1 = abajo, 2 = izquierda, 3 = arriba
     private int direccion;
@@ -54,6 +56,22 @@ public class Enemigo {
         }
     }
 
+    public Bomba intentarDejarBomba() {
+        long ahora = System.currentTimeMillis();
+
+        if (ahora - momentoUltimaBomba >= intervaloBombas
+                && Math.random() < 0.02) {
+
+            momentoUltimaBomba = ahora;
+
+            boolean horizontal = direccion == 0 || direccion == 2;
+
+            return new Bomba(x, y, horizontal);
+        }
+
+        return null;
+    }
+    
     public void mover() {
 
         // Detectar si está cerca de una intersección.

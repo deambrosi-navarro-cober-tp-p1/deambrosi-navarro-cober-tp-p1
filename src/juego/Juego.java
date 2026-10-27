@@ -18,6 +18,10 @@ public class Juego extends InterfaceJuego {
     private Enemigo[] enemigos = new Enemigo[5];
     private long momentoUltimoGolpe = 0;
     private final long tiempoInvulnerable = 1500;
+    private Bomba[] bombas = new Bomba[20];
+    private final int META_PEDIDOS = 5;
+    private boolean juegoTerminado = false;
+    private boolean victoria = false;
 
     Juego() {
         this.entorno = new Entorno(this, "Proyecto para TP", 800, 600);
@@ -101,6 +105,19 @@ private void dibujarSegmento(
 
 
 public void tick() {
+	//cartel de victoria
+	if (juegoTerminado) {
+	    if (victoria) {
+	        entorno.cambiarFont("Arial", 36, Color.YELLOW);
+	        entorno.escribirTexto(
+	            "¡GANASTE!", 300, 280);
+	        entorno.cambiarFont("Arial", 20, Color.WHITE);
+	        entorno.escribirTexto(
+	            "Entregaste " + pedidosEntregados + " pedidos",
+	            270, 320);
+	    }
+	    return;
+	}
 
     // 1. Fondo y mapa.
     mapa.dibujarFondo(entorno);
@@ -142,6 +159,56 @@ public void tick() {
             }
         }
     }
+
+//bombas 
+for (int i = 0; i < enemigos.length; i++) {
+    if (enemigos[i] != null) {
+        Bomba nueva = enemigos[i].intentarDejarBomba();
+
+        if (nueva != null) {
+            for (int j = 0; j < bombas.length; j++) {
+                if (bombas[j] == null) {
+                    bombas[j] = nueva;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+for (int i = 0; i < bombas.length; i++) {
+    if (bombas[i] != null) {
+        bombas[i].actualizar();
+        bombas[i].dibujar(entorno);
+
+        if (!bombas[i].estaActiva()) {
+            bombas[i] = null;
+        }
+    }
+}
+//lastima al jugador 
+long ahoraBomba = System.currentTimeMillis();
+
+if (ahoraBomba - momentoUltimoGolpe >= tiempoInvulnerable) {
+    for (int i = 0; i < bombas.length; i++) {
+        if (bombas[i] != null
+                && bombas[i].afectaJugador(jugador)) {
+
+            if (vidas > 0) {
+                vidas--;
+            }
+
+            if (pedidoActual != null
+                    && pedidoActual.getEstado().equals("En camino")) {
+                pedidoActual.setEstado("Perdido");
+                momentoPedidoPerdido = ahoraBomba;
+            }
+
+            momentoUltimoGolpe = ahoraBomba;
+            break;
+        }
+    }
+}
 
     
     // 2. Crear un pedido nuevo cuando el anterior fue entregado.
@@ -192,6 +259,11 @@ if (pedidoActual.getEstado().equals("En camino")
         pedidoActual.setEstado("Entregado");
         pedidosEntregados++;
     }
+}
+
+if (pedidosEntregados >= META_PEDIDOS) {
+    juegoTerminado = true;
+    victoria = true;
 }
 
 //Verificar si se vencieron los 60 segundos.
