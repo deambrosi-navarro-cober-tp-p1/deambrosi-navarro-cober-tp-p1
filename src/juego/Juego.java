@@ -15,14 +15,20 @@ public class Juego extends InterfaceJuego {
     private int pedidosEntregados = 0;
     private int vidas = 3;
     private int enemigosEliminados = 0;
+    private Enemigo[] enemigos = new Enemigo[5];
+    private long momentoUltimoGolpe = 0;
+    private final long tiempoInvulnerable = 1500;
 
     Juego() {
         this.entorno = new Entorno(this, "Proyecto para TP", 800, 600);
 
         mapa = new Mapa();
         jugador = new Jugador(400, 500);
-
-
+        
+        for (int i = 0; i < enemigos.length; i++) {
+            enemigos[i] = crearEnemigo(); 
+        }
+        
         crearPedido();
 
         this.entorno.iniciar();
@@ -99,7 +105,45 @@ public void tick() {
     // 1. Fondo y mapa.
     mapa.dibujarFondo(entorno);
     mapa.dibujar(entorno);
+    
+    // enemigos
+    for (int i = 0; i < enemigos.length; i++) {
+        if (enemigos[i] != null) {
+            enemigos[i].mover();
+            enemigos[i].dibujar(entorno);
+        }
+    }
 
+
+    long ahora = System.currentTimeMillis();
+
+    if (ahora - momentoUltimoGolpe >= tiempoInvulnerable) {
+        for (int i = 0; i < enemigos.length; i++) {
+            if (enemigos[i] != null && enemigos[i].colisionaCon(jugador)) {
+
+                // El enemigo desaparece y se crea otro inmediatamente
+                enemigos[i] = crearEnemigo();
+
+                // Se resta una vida
+                if (vidas > 0) {
+                    vidas--;
+                }
+
+                momentoUltimoGolpe = ahora;
+
+                // Si llevaba un pedido, lo pierde
+                if (pedidoActual != null
+                        && pedidoActual.getEstado().equals("En camino")) {
+                    pedidoActual.setEstado("Perdido");
+                    momentoPedidoPerdido = ahora;
+                }
+
+                break;
+            }
+        }
+    }
+
+    
     // 2. Crear un pedido nuevo cuando el anterior fue entregado.
 
  // 2. Crear un pedido nuevo cuando corresponda.
@@ -202,15 +246,11 @@ if (pedidoActual.getEstado().equals("En camino")) {
 
 //Vidas.
 entorno.escribirTexto(
-     "Vidas: " + vidas,
-     20, 100
-);
+     "Vidas: " + vidas, 20, 100);
 
 //Enemigos eliminados.
 entorno.escribirTexto(
-     "Enemigos eliminados: " + enemigosEliminados,
-     20, 125
-);
+     "Enemigos eliminados: " + enemigosEliminados,20, 125);
 
     // 8. Dibujar la flecha según el estado actual.
     if (pedidoActual.getEstado().equals("Esperando")) {
@@ -273,7 +313,20 @@ if (entorno.estaPresionada('a')
     }
 }
 
+private Enemigo crearEnemigo() {
+    double[] callesX = {27, 212, 397, 582, 767};
+    double[] callesY = {35, 165, 295, 425, 555};
 
+    if (Math.random() < 0.5) {
+        double x = callesX[(int) (Math.random() * callesX.length)];
+        double y = callesY[(int) (Math.random() * callesY.length)];
+        return new Enemigo(x, y, true, 20, 780);
+    } else {
+        double x = callesX[(int) (Math.random() * callesX.length)];
+        double y = callesY[(int) (Math.random() * callesY.length)];
+        return new Enemigo(x, y, false, 20, 580);
+    }
+}
 
     @SuppressWarnings("unused")
     public static void main(String[] args) {
