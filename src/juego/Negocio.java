@@ -31,18 +31,23 @@ public class Negocio {
 		}
 	}
 	
-	public int bordeSuperior() {
-		return this.y-this.alto/2;
-	}
-	public int bordeInferior() {
-		return this.y+this.alto/2;
-	}
-	public int bordeDerecho() {
-		return this.x+this.ancho/2;
-	}
-	public int bordeIzquierdo() {
-		return this.x-this.ancho/2;
-	}
+
+public int bordeSuperior() {
+    return y - (int) (imagen.getHeight(null) * 0.21 / 2);
+}
+
+public int bordeInferior() {
+    return y + (int) (imagen.getHeight(null) * 0.21 / 2);
+}
+
+public int bordeDerecho() {
+    return x + (int) (imagen.getWidth(null) * 0.21 / 2);
+}
+
+public int bordeIzquierdo() {
+    return x - (int) (imagen.getWidth(null) * 0.21 / 2);
+}
+
 	
 	public boolean colisionaCon(Jugador jugador) {
 		if(jugador.bordeIzquierdo() > this.bordeDerecho()) {
@@ -58,5 +63,18 @@ public class Negocio {
 			return false;
 		}
 		return true;
+	}
+	public int getX() {
+	    return this.x;
+	}
+
+	public int getY() {
+	    return this.y;
+	}
+	public boolean contieneMouse(int mouseX, int mouseY) {
+	    return mouseX >= bordeIzquierdo()
+	        && mouseX <= bordeDerecho()
+	        && mouseY >= bordeSuperior()
+	        && mouseY <= bordeInferior();
 	}
 }

@@ -20,8 +20,8 @@ public class Jugador {
 	public Jugador(double x,double y) {
 		this.x=x;
 		this.y=y;
-		this.ancho = 40;
-		this.alto = 40;
+		this.ancho = 10;
+		this.alto = 10;
 		try {
 		    this.arriba = ImageIO.read(new File("src/img/Repartidor arriba.png"));
 		    this.abajo = ImageIO.read(new File("src/img/Repartidor abajo.png"));
@@ -89,4 +89,43 @@ public class Jugador {
 		}
 		return true;
 	}
+	public double getX() {
+	    return this.x;
+	}
+
+	public double getY() {
+	    return this.y;
+	}
+	public boolean colisionaConNegocio(Negocio negocio) {
+	    if (this.bordeIzquierdo() > negocio.bordeDerecho()) {
+	        return false;
+	    }
+	    if (this.bordeDerecho() < negocio.bordeIzquierdo()) {
+	        return false;
+	    }
+	    if (this.bordeSuperior() > negocio.bordeInferior()) {
+	        return false;
+	    }
+	    if (this.bordeInferior() < negocio.bordeSuperior()) {
+	        return false;
+	    }
+	    return true;
+	}
+	
+	public boolean colisionaConCasa(Casa casa) {
+	    if (this.bordeIzquierdo() > casa.bordeDerecho()) {
+	        return false;
+	    }
+	    if (this.bordeDerecho() < casa.bordeIzquierdo()) {
+	        return false;
+	    }
+	    if (this.bordeSuperior() > casa.bordeInferior()) {
+	        return false;
+	    }
+	    if (this.bordeInferior() < casa.bordeSuperior()) {
+	        return false;
+	    }
+	    return true;
+	}
+	
 }
