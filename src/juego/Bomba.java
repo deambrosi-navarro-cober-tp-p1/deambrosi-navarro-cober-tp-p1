@@ -23,9 +23,7 @@ public class Bomba {
         this.y = y;
         this.calleHorizontal = calleHorizontal;
 
-        this.esInterseccion =
-            estaCercaDeCalle(x, new double[]{27, 212, 397, 582, 767})
-            && estaCercaDeCalle(y, new double[]{35, 165, 295, 425, 555});
+        this.esInterseccion = estaCercaDeCalle(x, new double[]{27, 212, 397, 582, 767})&& estaCercaDeCalle(y, new double[]{35, 165, 295, 425, 555});
 
         this.momentoColocacion = System.currentTimeMillis();
     }
@@ -63,18 +61,14 @@ public class Bomba {
         } else {
             if (esInterseccion) {
                 // Explosión horizontal
-                entorno.dibujarRectangulo(
-                    x, y, 90, 20, 0, Color.ORANGE);
+                entorno.dibujarRectangulo(x, y, 90, 20, 0, Color.ORANGE);
 
                 // Explosión vertical
-                entorno.dibujarRectangulo(
-                    x, y, 28, 90, 0, Color.ORANGE);
+                entorno.dibujarRectangulo(x, y, 28, 90, 0, Color.ORANGE);
             } else if (calleHorizontal) {
-                entorno.dibujarRectangulo(
-                    x, y, 90, 20, 0, Color.ORANGE);
+                entorno.dibujarRectangulo(x, y, 90, 20, 0, Color.ORANGE);
             } else {
-                entorno.dibujarRectangulo(
-                    x, y, 28, 90, 0, Color.ORANGE);
+                entorno.dibujarRectangulo(x, y, 28, 90, 0, Color.ORANGE);
             }
         }
         }
@@ -84,18 +78,23 @@ public class Bomba {
         }
 
         boolean horizontal =
-            Math.abs(jugador.getY() - y) <= 10
-            && Math.abs(jugador.getX() - x) <= 45;
+            Math.abs(jugador.getY() - y) <= 10 && Math.abs(jugador.getX() - x) <= 45;
 
         boolean vertical =
-            Math.abs(jugador.getX() - x) <= 14
-            && Math.abs(jugador.getY() - y) <= 45;
+            Math.abs(jugador.getX() - x) <= 14 && Math.abs(jugador.getY() - y) <= 45;
 
         if (esInterseccion) {
             return horizontal || vertical;
         }
 
         return calleHorizontal ? horizontal : vertical;
+    }
+    public boolean tocaJugador(Jugador jugador) {
+        if (!activa || exploto) {
+            return false;
+        }
+
+        return Math.abs(jugador.getX() - x) <= 12 && Math.abs(jugador.getY() - y) <= 12;
     }
 
     public boolean exploto() {

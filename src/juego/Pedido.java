@@ -44,8 +44,7 @@ public class Pedido {
             return false;
         }
 
-        long tiempoTranscurrido =
-                System.currentTimeMillis() - inicioEntrega;
+        long tiempoTranscurrido = System.currentTimeMillis() - inicioEntrega;
 
         return tiempoTranscurrido >= limiteMilisegundos;
     }

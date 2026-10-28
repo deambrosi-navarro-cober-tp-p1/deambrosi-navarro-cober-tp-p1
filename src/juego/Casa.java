@@ -1,6 +1,7 @@
+
 package juego;
+
 import entorno.Entorno;
-import java.awt.Color;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
@@ -9,15 +10,11 @@ import javax.imageio.ImageIO;
 	public class Casa {
 	private int x;
 	private int y;
-	private int ancho;
-	private int alto;
 	private Image imagen;
 	
 	public Casa(int x, int y, int ancho, int alto,String archivo) {
 		this.x=x;
 		this.y=y;
-		this.ancho=ancho;
-		this.alto=alto;
         try {
             this.imagen = ImageIO.read(new File(archivo));
         } catch (IOException e) {
@@ -28,26 +25,26 @@ import javax.imageio.ImageIO;
 	
 	public void dibujar(Entorno e) {
 		if(imagen != null) {
-			e.dibujarImagen(imagen, this.x, this.y, 0, 0.21);
+			e.dibujarImagen(imagen, this.x, this.y, 0, 0.20);
 		}
 	}
 	
 
-public int bordeSuperior() {
-    return y - (int) (imagen.getHeight(null) * 0.21 / 2);
-}
+	public int bordeSuperior() {
+		return y - (int) (imagen.getHeight(null) * 0.21 / 2);
+		}
 
-public int bordeInferior() {
-    return y + (int) (imagen.getHeight(null) * 0.21 / 2);
-}
+	public int bordeInferior() {
+		return y + (int) (imagen.getHeight(null) * 0.21 / 2);
+		}
 
-public int bordeDerecho() {
-    return x + (int) (imagen.getWidth(null) * 0.21 / 2);
-}
+	public int bordeDerecho() {
+		return x + (int) (imagen.getWidth(null) * 0.21 / 2);
+		}
 
-public int bordeIzquierdo() {
-    return x - (int) (imagen.getWidth(null) * 0.21 / 2);
-}
+	public int bordeIzquierdo() {
+		return x - (int) (imagen.getWidth(null) * 0.21 / 2);
+		}
 
 	
 	public boolean colisionaCon(Jugador jugador) {

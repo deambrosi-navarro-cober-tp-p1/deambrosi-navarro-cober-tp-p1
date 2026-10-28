@@ -17,16 +17,12 @@ public class Enemigo {
     private long momentoUltimaBomba = 0;
     private long intervaloBombas = 4000;
 
-    // 0 = derecha, 1 = abajo, 2 = izquierda, 3 = arriba
     private int direccion;
-
     private double velocidad = 2;
-
     private int ultimoCruceX = -1;
     private int ultimoCruceY = -1;
 
-    public Enemigo(double x, double y, boolean horizontal,
-                   double limiteMinimo, double limiteMaximo) {
+    public Enemigo(double x, double y, boolean horizontal, double limiteMinimo, double limiteMaximo) {
 
         this.x = x;
         this.y = y;
@@ -59,8 +55,7 @@ public class Enemigo {
     public Bomba intentarDejarBomba() {
         long ahora = System.currentTimeMillis();
 
-        if (ahora - momentoUltimaBomba >= intervaloBombas
-                && Math.random() < 0.02) {
+        if (ahora - momentoUltimaBomba >= intervaloBombas && Math.random() < 0.02) {
 
             momentoUltimaBomba = ahora;
 
@@ -81,15 +76,9 @@ public class Enemigo {
         double xInterseccion = 27 + cruceX * 185;
         double yInterseccion = 35 + cruceY * 130;
 
-        boolean cercaDeCruce =
-            cruceX >= 0 && cruceX <= 4
-            && cruceY >= 0 && cruceY <= 4
-            && Math.abs(x - xInterseccion) <= 3
-            && Math.abs(y - yInterseccion) <= 3;
+        boolean cercaDeCruce = cruceX >= 0 && cruceX <= 4 && cruceY >= 0 && cruceY <= 4 && Math.abs(x - xInterseccion) <= 3 && Math.abs(y - yInterseccion) <= 3;
 
-        if (cercaDeCruce
-                && (cruceX != ultimoCruceX
-                || cruceY != ultimoCruceY)) {
+        if (cercaDeCruce && (cruceX != ultimoCruceX || cruceY != ultimoCruceY)) {
 
             ultimoCruceX = cruceX;
             ultimoCruceY = cruceY;
@@ -109,17 +98,13 @@ public class Enemigo {
 
         // Avanzar en la dirección elegida.
         switch (direccion) {
-            case 0:
-                x += velocidad;
+            case 0:x += velocidad;
                 break;
-            case 1:
-                y += velocidad;
+            case 1:y += velocidad;
                 break;
-            case 2:
-                x -= velocidad;
+            case 2:x -= velocidad;
                 break;
-            case 3:
-                y -= velocidad;
+            case 3:y -= velocidad;
                 break;
         }
 

@@ -1,6 +1,7 @@
+
 package juego;
+
 import entorno.Entorno;
-import entorno.Herramientas;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
@@ -38,13 +39,13 @@ public class Jugador {
 	
 	public void dibujar(Entorno e) {
 		if (direccion == 'w') {
-			e.dibujarImagen(arriba, this.x, this.y, 0, 0.036);
+			e.dibujarImagen(arriba, this.x, this.y, 0, 0.033);
 		}else if (direccion == 's'){
-			e.dibujarImagen(abajo, this.x, this.y, 0, 0.036);
+			e.dibujarImagen(abajo, this.x, this.y, 0, 0.033);
 		}else if (direccion == 'a') {
-			e.dibujarImagen(izquierda, this.x, this.y, 0, 0.036);
+			e.dibujarImagen(izquierda, this.x, this.y, 0, 0.033);
 		}else if(direccion == 'd') {
-			e.dibujarImagen(derecha, this.x, this.y, 0, 0.036);
+			e.dibujarImagen(derecha, this.x, this.y, 0, 0.033);
 		}
 	}
 	
@@ -127,5 +128,7 @@ public class Jugador {
 	    }
 	    return true;
 	}
-	
+	public char getDireccion() {
+	    return direccion;
+	}
 }

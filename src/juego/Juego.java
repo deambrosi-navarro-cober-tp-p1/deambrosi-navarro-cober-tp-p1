@@ -7,38 +7,60 @@ import entorno.InterfaceJuego;
 
 public class Juego extends InterfaceJuego {
 
+    // ATRIBUTOS DEL JUEGO
+
     private Entorno entorno;
     private Jugador jugador;
     private Mapa mapa;
     private Pedido pedidoActual;
-    private long momentoPedidoPerdido;
+
+    // Pedidos
     private int pedidosEntregados = 0;
+    private int pedidosPerdidos = 0;
+    private final int META_PEDIDOS = 5;
+    private final int MAX_PEDIDOS_PERDIDOS = 5;
+    private long momentoPedidoPerdido;
+    private long momentoCreacionPedido;
+
+    // Jugador
     private int vidas = 3;
-    private int enemigosEliminados = 0;
-    private Enemigo[] enemigos = new Enemigo[5];
     private long momentoUltimoGolpe = 0;
     private final long tiempoInvulnerable = 1500;
+
+    // Enemigos y proyectiles
+    private Enemigo[] enemigos = new Enemigo[5];
+    private int enemigosEliminados = 0;
+    private Proyectil proyectil;
+
+    // Bombas
     private Bomba[] bombas = new Bomba[20];
-    private final int META_PEDIDOS = 5;
+
+    // Tiempo y estado de la partida
+    private long momentoInicioJuego;
     private boolean juegoTerminado = false;
     private boolean victoria = false;
 
+    // CONSTRUCTOR
+    
     Juego() {
-        this.entorno = new Entorno(this, "Proyecto para TP", 800, 600);
+        entorno = new Entorno(this, "Proyecto para TP", 800, 600);
 
         mapa = new Mapa();
         jugador = new Jugador(400, 500);
-        
+
         for (int i = 0; i < enemigos.length; i++) {
-            enemigos[i] = crearEnemigo(); 
+            enemigos[i] = crearEnemigo();
         }
-        
+
         crearPedido();
 
-        this.entorno.iniciar();
+        momentoInicioJuego = System.currentTimeMillis();
+
+        entorno.iniciar();
     }
 
-    // Crea un pedido con una casa de destino y un negocio de origen aleatorios.
+    // CREACIÓN DE PEDIDOS
+
     private void crearPedido() {
         Casa[] casas = mapa.getCasas();
         Negocio[] negocios = mapa.getNegocios();
@@ -50,13 +72,11 @@ public class Juego extends InterfaceJuego {
         Negocio negocioOrigen = negocios[indiceNegocio];
 
         pedidoActual = new Pedido(casaDestino, negocioOrigen);
-        pedidoActual.setEstado("Esperando");
+
+        momentoCreacionPedido = System.currentTimeMillis();
     }
-    
 
-
-
-
+    // DIBUJO DE FLECHAS
 
     private void dibujarFlecha(double destinoX, double destinoY) {
         double puntaX = destinoX;
@@ -64,341 +84,417 @@ public class Juego extends InterfaceJuego {
         double baseY = puntaY - 14;
 
         // Palo de la flecha
-        entorno.dibujarRectangulo(
-            destinoX, baseY - 12,
-            7, 24, 0, Color.YELLOW
-        );
+        entorno.dibujarRectangulo(destinoX,baseY - 12,7,24,0,Color.YELLOW);
 
-        // Punta más ancha y bien unida al palo
-        dibujarSegmento(
-            destinoX - 12, baseY - 2,
-            puntaX, puntaY, 7
-        );
+        // Punta de la flecha
+        dibujarSegmento(destinoX - 12, baseY - 2,puntaX, puntaY,7);
 
-        dibujarSegmento(
-            puntaX, puntaY,
-            destinoX + 12, baseY - 2, 7
-        );
+        dibujarSegmento(puntaX, puntaY,destinoX + 12, baseY - 2,7);
     }
 
+    private void dibujarSegmento(double x1, double y1,double x2, double y2,double grosor) {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
 
+        double largo = Math.sqrt(dx * dx + dy * dy);
+        double angulo = Math.atan2(dy, dx);
 
+        entorno.dibujarRectangulo((x1 + x2) / 2,(y1 + y2) / 2,largo,grosor,angulo,Color.YELLOW);
+    }
 
-private void dibujarSegmento(
-        double x1, double y1, double x2, double y2, double grosor) {
+    // CICLO PRINCIPAL DEL JUEGO
 
-    double dx = x2 - x1;
-    double dy = y2 - y1;
-    double largo = Math.sqrt(dx * dx + dy * dy);
-    double angulo = Math.atan2(dy, dx);
+    public void tick() {
 
-    entorno.dibujarRectangulo(
-        (x1 + x2) / 2,
-        (y1 + y2) / 2,
-        largo,
-        grosor,
-        angulo,
-        Color.YELLOW
-    );
-}
+        // Si la partida terminó, mostrar el resultado.
+        if (juegoTerminado) {
+            mostrarResultado();
+            return;
+        }
 
+        // 1. Dibujar el fondo y el mapa.
+        mapa.dibujarFondo(entorno);
+        mapa.dibujar(entorno);
 
+        // 2. Actualizar y dibujar enemigos.
+        actualizarEnemigos();
 
-public void tick() {
-	//cartel de victoria
-	if (juegoTerminado) {
-	    if (victoria) {
-	        entorno.cambiarFont("Arial", 36, Color.YELLOW);
-	        entorno.escribirTexto(
-	            "¡GANASTE!", 300, 280);
-	        entorno.cambiarFont("Arial", 20, Color.WHITE);
-	        entorno.escribirTexto(
-	            "Entregaste " + pedidosEntregados + " pedidos",
-	            270, 320);
-	    }
-	    return;
-	}
+        // 3. Comprobar colisiones con enemigos.
+        comprobarColisionesEnemigos();
 
-    // 1. Fondo y mapa.
-    mapa.dibujarFondo(entorno);
-    mapa.dibujar(entorno);
-    
-    // enemigos
-    for (int i = 0; i < enemigos.length; i++) {
-        if (enemigos[i] != null) {
-            enemigos[i].mover();
-            enemigos[i].dibujar(entorno);
+        // 4. Reponer enemigos eliminados.
+        reponerEnemigos();
+
+        // 5. Actualizar y comprobar bombas.
+        actualizarBombas();
+
+        // 6. Crear pedidos y actualizar sus estados.
+        actualizarPedidos();
+
+        // 7. Comprobar victoria y derrota.
+        comprobarFinDelJuego();
+
+        // Si se terminó la partida durante este ciclo,
+        // mostrar el resultado y no continuar.
+        if (juegoTerminado) {
+            mostrarResultado();
+            return;
+        }
+
+        // 8. Dibujar al jugador.
+        jugador.dibujar(entorno);
+
+        // 9. Disparar y actualizar el proyectil.
+        disparar();
+        actualizarProyectil();
+
+        // 10. Mostrar la información del juego.
+        dibujarHUD();
+
+        // 11. Dibujar la flecha del pedido actual.
+        dibujarFlechaPedido();
+
+        // 12. Actualizar el movimiento del jugador.
+        moverJugador();
+    }
+
+    // ENEMIGOS
+
+    private void actualizarEnemigos() {
+        for (int i = 0; i < enemigos.length; i++) {
+            if (enemigos[i] != null) {
+                enemigos[i].mover();
+                enemigos[i].dibujar(entorno);
+            }
         }
     }
 
+    private void comprobarColisionesEnemigos() {
+        long ahora = System.currentTimeMillis();
 
-    long ahora = System.currentTimeMillis();
+        if (ahora - momentoUltimoGolpe < tiempoInvulnerable) {
+            return;
+        }
 
-    if (ahora - momentoUltimoGolpe >= tiempoInvulnerable) {
         for (int i = 0; i < enemigos.length; i++) {
             if (enemigos[i] != null && enemigos[i].colisionaCon(jugador)) {
 
-                // El enemigo desaparece y se crea otro inmediatamente
+                // Reemplazar al enemigo que chocó con el jugador.
                 enemigos[i] = crearEnemigo();
 
-                // Se resta una vida
+                // Restar una vida.
                 if (vidas > 0) {
                     vidas--;
                 }
 
+                if (vidas <= 0) {
+                    juegoTerminado = true;
+                    victoria = false;
+                }
                 momentoUltimoGolpe = ahora;
 
-                // Si llevaba un pedido, lo pierde
-                if (pedidoActual != null
-                        && pedidoActual.getEstado().equals("En camino")) {
+                // Perder el pedido si estaba en camino.
+                if (pedidoActual != null && pedidoActual.getEstado().equals("En camino")) {
                     pedidoActual.setEstado("Perdido");
+                    pedidosPerdidos++;
                     momentoPedidoPerdido = ahora;
                 }
+                break;
+            }
+        }
+    }
+
+    private Enemigo crearEnemigo() {
+        double[] callesX = {27, 212, 397, 582, 767};
+        double[] callesY = {35, 165, 295, 425, 555};
+
+        if (Math.random() < 0.5) {
+            double x = callesX[(int) (Math.random() * callesX.length)];
+
+            double y = callesY[(int) (Math.random() * callesY.length)];
+
+            return new Enemigo(x, y, true, 20, 780);
+
+        } else {
+            double x = callesX[(int) (Math.random() * callesX.length)];
+
+            double y = callesY[(int) (Math.random() * callesY.length)];
+            
+            return new Enemigo(x, y, false, 20, 580);
+        }
+    }
+
+    private void reponerEnemigos() {
+        for (int i = 0; i < enemigos.length; i++) {
+            if (enemigos[i] == null) {
+                enemigos[i] = crearEnemigo();
+            }
+        }
+    }
+
+    // BOMBAS
+
+    private void actualizarBombas() {
+
+        // Permitir que los enemigos dejen bombas.
+        for (int i = 0; i < enemigos.length; i++) {
+            if (enemigos[i] != null) {
+                Bomba nueva = enemigos[i].intentarDejarBomba();
+
+                if (nueva != null) {
+                    for (int j = 0; j < bombas.length; j++) {
+                        if (bombas[j] == null) {
+                            bombas[j] = nueva;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Actualizar, dibujar y eliminar bombas inactivas.
+        for (int i = 0; i < bombas.length; i++) {
+            if (bombas[i] != null) {            	
+                bombas[i].actualizar();
+                bombas[i].dibujar(entorno);
+
+                if (!bombas[i].estaActiva()) {
+                    bombas[i] = null;
+                }
+            }
+        }
+
+        // Derrota inmediata por contacto con una bomba
+        // o por estar dentro del área de explosión.
+        for (int i = 0; i < bombas.length; i++) {
+            if (bombas[i] != null && (bombas[i].tocaJugador(jugador) || bombas[i].afectaJugador(jugador))) {
+                juegoTerminado = true;
+                victoria = false;
+                break;
+            }
+        }
+    }
+
+    // PEDIDOS
+
+    private void actualizarPedidos() {
+
+        // Crear un pedido cuando corresponda.
+        if (pedidoActual == null || pedidoActual.getEstado().equals("Entregado")) {
+            crearPedido();
+
+        } else if (pedidoActual.getEstado().equals("Perdido")  && System.currentTimeMillis() - momentoPedidoPerdido >= 2000) {
+            crearPedido();
+        }
+
+        // Pasar de Realizado a Esperando después de 2 segundos.
+        if (pedidoActual != null && pedidoActual.getEstado().equals("Realizado") && System.currentTimeMillis() - momentoCreacionPedido >= 2000) {
+        	pedidoActual.setEstado("Esperando");
+        }
+
+        // Retirar el pedido en el negocio con clic derecho.
+        if (pedidoActual.getEstado().equals("Esperando") && entorno.sePresionoBoton(entorno.BOTON_DERECHO)) {
+
+            Negocio negocio = pedidoActual.getNegocioOrigen();
+
+            double distanciaX = Math.abs(jugador.getX() - negocio.getX());
+
+            double distanciaY = Math.abs(jugador.getY() - negocio.getY());
+
+            if (distanciaX <= 35 && distanciaY <= 45) {
+                pedidoActual.setEstado("En camino");
+            }
+        }
+
+        // Entregar el pedido en la casa con clic derecho.
+        if (pedidoActual.getEstado().equals("En camino") && entorno.sePresionoBoton(entorno.BOTON_DERECHO)) {
+
+            Casa casa = pedidoActual.getCasaDestino();
+
+            double distanciaX = Math.abs(jugador.getX() - casa.getX());
+
+            double distanciaY = Math.abs(jugador.getY() - casa.getY());
+
+            if (distanciaX <= 35 && distanciaY <= 45) {
+                pedidoActual.setEstado("Entregado");
+                pedidosEntregados++;
+            }
+        }
+
+        // Comprobar si venció el tiempo de entrega.
+        if (pedidoActual.getEstado().equals("En camino") && pedidoActual.seVencio(20000)) {
+            pedidoActual.setEstado("Perdido");
+            pedidosPerdidos++;
+            momentoPedidoPerdido = System.currentTimeMillis();
+        }
+    }
+
+    // PROYECTILES
+
+    private void disparar() {
+        if (proyectil == null && entorno.sePresionoBoton(entorno.BOTON_IZQUIERDO)) {
+        	proyectil = new Proyectil(jugador.getX(),jugador.getY(),jugador.getDireccion());
+        }
+    }
+
+    private void actualizarProyectil() {
+        if (proyectil == null) {
+            return;
+        }
+        proyectil.mover();
+        proyectil.dibujar(entorno);
+
+        // Si sale del mapa, desaparece.
+        if (proyectil.estaFueraDelMapa()) {
+            proyectil = null;
+            return;
+        }
+
+        // Si choca con una casa o un negocio, desaparece.
+        if (mapa.colisionaProyectil(proyectil)) {
+            proyectil = null;
+            return;
+        }
+
+        // Comprobar colisiones con enemigos.
+        for (int i = 0; i < enemigos.length; i++) {
+            if (enemigos[i] != null && proyectil.colisionaCon(enemigos[i])) {
+            	proyectil = null;
+            	enemigos[i] = null;
+            	enemigosEliminados++;
 
                 break;
             }
         }
     }
 
-//bombas 
-for (int i = 0; i < enemigos.length; i++) {
-    if (enemigos[i] != null) {
-        Bomba nueva = enemigos[i].intentarDejarBomba();
+    // MOVIMIENTO Y COLISION DEL JUGADOR
 
-        if (nueva != null) {
-            for (int j = 0; j < bombas.length; j++) {
-                if (bombas[j] == null) {
-                    bombas[j] = nueva;
-                    break;
-                }
+    private void moverJugador() {
+
+        // Movimiento hacia arriba.
+        if (entorno.estaPresionada('w') && jugador.bordeSuperior() >= 0) {
+        	jugador.cambiarDireccion('w');
+        	jugador.moverArriba();
+
+            if (mapa.colisionaCon(jugador) || mapa.colisionaConNegocio(jugador)) {
+            	jugador.moverAbajo();
+            }
+        }
+
+        // Movimiento hacia abajo.
+        if (entorno.estaPresionada('s') && jugador.bordeInferior() <= entorno.alto()) {
+        	jugador.cambiarDireccion('s');
+        	jugador.moverAbajo();
+
+            if (mapa.colisionaCon(jugador) || mapa.colisionaConNegocio(jugador)) {
+            	jugador.moverArriba();
+            }
+        }
+
+        // Movimiento hacia la derecha.
+        if (entorno.estaPresionada('d') && jugador.bordeDerecho() <= entorno.ancho()) {
+        	jugador.cambiarDireccion('d');
+        	jugador.moverDerecha();
+
+            if (mapa.colisionaCon(jugador) || mapa.colisionaConNegocio(jugador)) {
+            	jugador.moverIzquierda();
+            }
+        }
+
+        // Movimiento hacia la izquierda.
+        if (entorno.estaPresionada('a') && jugador.bordeIzquierdo() >= 0) {
+        	jugador.cambiarDireccion('a');
+        	jugador.moverIzquierda();
+
+            if (mapa.colisionaCon(jugador) || mapa.colisionaConNegocio(jugador)) {
+            	jugador.moverDerecha();
             }
         }
     }
-}
 
-for (int i = 0; i < bombas.length; i++) {
-    if (bombas[i] != null) {
-        bombas[i].actualizar();
-        bombas[i].dibujar(entorno);
+    // HUD
 
-        if (!bombas[i].estaActiva()) {
-            bombas[i] = null;
-        }
-    }
-}
-//lastima al jugador 
-long ahoraBomba = System.currentTimeMillis();
+    private void dibujarHUD() {
+        entorno.cambiarFont("Arial", 18, Color.WHITE);
 
-if (ahoraBomba - momentoUltimoGolpe >= tiempoInvulnerable) {
-    for (int i = 0; i < bombas.length; i++) {
-        if (bombas[i] != null
-                && bombas[i].afectaJugador(jugador)) {
+        // Estado del pedido.
+        entorno.escribirTexto("Estado: " + pedidoActual.getEstado(),20, 25);
 
-            if (vidas > 0) {
-                vidas--;
+        // Pedidos entregados.
+        entorno.escribirTexto("Pedidos entregados: " + pedidosEntregados,20, 50);
+
+        // Tiempo restante del pedido.
+        if (pedidoActual.getEstado().equals("En camino")) {
+        	long tiempoRestante = 20 - (System.currentTimeMillis() - pedidoActual.getInicioEntrega()) / 1000;
+        	
+        	if (tiempoRestante < 0) {tiempoRestante = 0;
             }
+        	entorno.escribirTexto("Tiempo restante: " + tiempoRestante + " segundos",20, 75);
 
-            if (pedidoActual != null
-                    && pedidoActual.getEstado().equals("En camino")) {
-                pedidoActual.setEstado("Perdido");
-                momentoPedidoPerdido = ahoraBomba;
-            }
-
-            momentoUltimoGolpe = ahoraBomba;
-            break;
+        } else {
+            entorno.escribirTexto("Tiempo restante: --",20, 75);
         }
-    }
-}
 
-    
-    // 2. Crear un pedido nuevo cuando el anterior fue entregado.
+        // Vidas.
+        entorno.escribirTexto("Vidas: " + vidas,20, 100);
 
- // 2. Crear un pedido nuevo cuando corresponda.
-    if (pedidoActual == null
-            || pedidoActual.getEstado().equals("Entregado")) {
+        // Enemigos eliminados.
+        entorno.escribirTexto("Enemigos eliminados: " + enemigosEliminados,20, 125);
 
-        crearPedido();
+        // Pedidos perdidos.
+        entorno.escribirTexto("Pedidos perdidos: " + pedidosPerdidos,20, 150);
 
-    } else if (pedidoActual.getEstado().equals("Perdido")
-            && System.currentTimeMillis() - momentoPedidoPerdido >= 2000) {
+        // Tiempo transcurrido de la partida.
+        long tiempoTranscurrido = (System.currentTimeMillis() - momentoInicioJuego) / 1000;
 
-        crearPedido();
+        entorno.escribirTexto("Tiempo transcurrido: " + tiempoTranscurrido + " segundos",20, 175);
     }
 
+    // FLECHA DEL PEDIDO
 
+    private void dibujarFlechaPedido() {
 
-    // 3. Retirar el pedido al acercarse al negocio y hacer clic derecho.
-    if (pedidoActual.getEstado().equals("Esperando")
-            && entorno.sePresionoBoton(entorno.BOTON_DERECHO)) {
+        if (pedidoActual.getEstado().equals("Esperando")) {
+            Negocio negocio = pedidoActual.getNegocioOrigen();
 
-        Negocio negocio = pedidoActual.getNegocioOrigen();
+            dibujarFlecha(negocio.getX(),negocio.getY());
 
-        double distanciaX = Math.abs(jugador.getX() - negocio.getX());
-        double distanciaY = Math.abs(jugador.getY() - negocio.getY());
+        } else if (pedidoActual.getEstado().equals("En camino")) {
+            Casa casa = pedidoActual.getCasaDestino();
 
-        
-        if (distanciaX <= 35 && distanciaY <= 45) {
-            pedidoActual.setEstado("En camino");
-            
+            dibujarFlecha(casa.getX(),casa.getY());
         }
     }
 
-    // 4. Entregar el pedido al acercarse a la casa y hacer clic derecho.
+    // VICTORIA Y DERROTA
 
-if (pedidoActual.getEstado().equals("En camino")
-        && entorno.sePresionoBoton(entorno.BOTON_DERECHO)) {
+    private void comprobarFinDelJuego() {
 
-    Casa casa = pedidoActual.getCasaDestino();
+        // Victoria por completar los pedidos necesarios.
+        if (pedidosEntregados >= META_PEDIDOS) {juegoTerminado = true;victoria = true;
+        }
 
-    double distanciaX = Math.abs(jugador.getX() - casa.getX());
-    double distanciaY = Math.abs(jugador.getY() - casa.getY());
-
-   
-
-    if (distanciaX <= 35 && distanciaY <= 45) {
-        pedidoActual.setEstado("Entregado");
-        pedidosEntregados++;
-    }
-}
-
-if (pedidosEntregados >= META_PEDIDOS) {
-    juegoTerminado = true;
-    victoria = true;
-}
-
-//Verificar si se vencieron los 60 segundos.
-if (pedidoActual.getEstado().equals("En camino")
-     && pedidoActual.seVencio(30000)) {
-
- pedidoActual.setEstado("Perdido");
- momentoPedidoPerdido = System.currentTimeMillis();
-}
-
-
-//6. Mostrar el jugador.
-jugador.dibujar(entorno);
-
-//7. Mostrar la HUD.
-entorno.cambiarFont("Arial", 18, Color.WHITE);
-
-//Estado del pedido.
-entorno.escribirTexto(
-     "Estado: " + pedidoActual.getEstado(),
-     20, 25
-);
-
-//Pedidos entregados.
-entorno.escribirTexto(
-     "Pedidos entregados: " + pedidosEntregados,
-     20, 50
-);
-
-//Cuenta regresiva de 60 segundos.
-if (pedidoActual.getEstado().equals("En camino")) {
-
- long tiempoRestante = 30
-         - (System.currentTimeMillis()
-         - pedidoActual.getInicioEntrega()) / 1000;
-
- if (tiempoRestante < 0) {
-     tiempoRestante = 0;
- }
-
- entorno.escribirTexto(
-         "Tiempo restante: " + tiempoRestante + " segundos",
-         20, 75
- );
-
-} else {
- entorno.escribirTexto(
-         "Tiempo restante: --",
-         20, 75
- );
-}
-
-//Vidas.
-entorno.escribirTexto(
-     "Vidas: " + vidas, 20, 100);
-
-//Enemigos eliminados.
-entorno.escribirTexto(
-     "Enemigos eliminados: " + enemigosEliminados,20, 125);
-
-    // 8. Dibujar la flecha según el estado actual.
-    if (pedidoActual.getEstado().equals("Esperando")) {
-        Negocio negocio = pedidoActual.getNegocioOrigen();
-        dibujarFlecha(negocio.getX(), negocio.getY());
-
-    } else if (pedidoActual.getEstado().equals("En camino")) {
-        Casa casa = pedidoActual.getCasaDestino();
-        dibujarFlecha(casa.getX(), casa.getY());
+        // Derrota por perder demasiados pedidos.
+        if (pedidosPerdidos >= MAX_PEDIDOS_PERDIDOS) {juegoTerminado = true;victoria = false;
+        }
     }
 
-    // 9. Movimiento hacia arriba.
+    private void mostrarResultado() {
 
-if (entorno.estaPresionada('w')
-        && jugador.bordeSuperior() >= 0) {
+        if (victoria) {
+            entorno.cambiarFont("Arial", 36, Color.YELLOW);
+            entorno.escribirTexto("¡GANASTE!", 270, 280);
 
-    jugador.cambiarDireccion('w');
-    jugador.moverArriba();
+        } else {
+            entorno.cambiarFont("Arial", 36, Color.RED);
+            entorno.escribirTexto("¡PERDISTE!", 270, 280);
+        }
 
-    if (mapa.colisionaCon(jugador)
-            || mapa.colisionaConNegocio(jugador)) {
-        jugador.moverAbajo();
+        entorno.cambiarFont("Arial", 20, Color.WHITE);
+
+        entorno.escribirTexto( "Pedidos entregados: " + pedidosEntregados,270, 320);
     }
-}
-
-if (entorno.estaPresionada('s')
-        && jugador.bordeInferior() <= entorno.alto()) {
-
-    jugador.cambiarDireccion('s');
-    jugador.moverAbajo();
-
-    if (mapa.colisionaCon(jugador)
-            || mapa.colisionaConNegocio(jugador)) {
-        jugador.moverArriba();
-    }
-}
-
-if (entorno.estaPresionada('d')
-        && jugador.bordeDerecho() <= entorno.ancho()) {
-
-    jugador.cambiarDireccion('d');
-    jugador.moverDerecha();
-
-    if (mapa.colisionaCon(jugador)
-            || mapa.colisionaConNegocio(jugador)) {
-        jugador.moverIzquierda();
-    }
-}
-
-if (entorno.estaPresionada('a')
-        && jugador.bordeIzquierdo() >= 0) {
-
-    jugador.cambiarDireccion('a');
-    jugador.moverIzquierda();
-
-    if (mapa.colisionaCon(jugador)
-            || mapa.colisionaConNegocio(jugador)) {
-        jugador.moverDerecha();
-    }
-    }
-}
-
-private Enemigo crearEnemigo() {
-    double[] callesX = {27, 212, 397, 582, 767};
-    double[] callesY = {35, 165, 295, 425, 555};
-
-    if (Math.random() < 0.5) {
-        double x = callesX[(int) (Math.random() * callesX.length)];
-        double y = callesY[(int) (Math.random() * callesY.length)];
-        return new Enemigo(x, y, true, 20, 780);
-    } else {
-        double x = callesX[(int) (Math.random() * callesX.length)];
-        double y = callesY[(int) (Math.random() * callesY.length)];
-        return new Enemigo(x, y, false, 20, 580);
-    }
-}
 
     @SuppressWarnings("unused")
     public static void main(String[] args) {

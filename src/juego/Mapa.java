@@ -57,26 +57,14 @@ public class Mapa {
                 cuadras[indice] = new Cuadra(x, y, 75, 75);
 
                 // Casas
-                casas[indice * 3] = new Casa(
-                    x - 32, y - 26, 26, 26,
-                    imagenesCasas[(indice * 3) % imagenesCasas.length]
-                );
+                casas[indice * 3] = new Casa( x - 32, y - 26, 26, 26,imagenesCasas[(indice * 3) % imagenesCasas.length]);
 
-                casas[indice * 3 + 1] = new Casa(
-                    x + 32, y - 26, 26, 26,
-                    imagenesCasas[(indice * 3 + 1) % imagenesCasas.length]
-                );
+                casas[indice * 3 + 1] = new Casa(x + 32, y - 26, 26, 26,imagenesCasas[(indice * 3 + 1) % imagenesCasas.length]);
 
-                casas[indice * 3 + 2] = new Casa(
-                    x - 32, y + 26, 26, 26,
-                    imagenesCasas[(indice * 3 + 2) % imagenesCasas.length]
-                );
+                casas[indice * 3 + 2] = new Casa(x - 32, y + 26, 26, 26,imagenesCasas[(indice * 3 + 2) % imagenesCasas.length]);
 
                 // Negocios
-                negocios[indice] = new Negocio(
-                    x + 32, y + 26, 26, 26,
-                    imagenesNegocios[indice]
-                );
+                negocios[indice] = new Negocio(x + 32, y + 26, 26, 26,imagenesNegocios[indice]);
 
                 indice++;
             }
@@ -101,25 +89,15 @@ public class Mapa {
     public void dibujarFondo(Entorno e) {
 
         // Pasto
-        e.dibujarRectangulo(
-            400, 300, 800, 600, 0,
-            new Color(115, 160, 95)
-        );
+        e.dibujarRectangulo(400, 300, 800, 600, 0,new Color(115, 160, 95));
 
         // Calles verticales
         for (int x = 27; x <= 767; x += 185) {
-            e.dibujarRectangulo(
-                x, 300, 28, 600, 0,
-                new Color(65, 70, 78)
-            );
+            e.dibujarRectangulo(x, 300, 28, 600, 0,new Color(65, 70, 78));
         }
 
         // Calles horizontales
-        for (int y = 35; y <= 555; y += 130) {
-            e.dibujarRectangulo(
-                400, y, 800, 20, 0,
-                new Color(65, 70, 78)
-            );
+        for (int y = 35; y <= 555; y += 130) {e.dibujarRectangulo(400, y, 800, 20, 0,new Color(65, 70, 78));
         }
     }
 
@@ -140,6 +118,22 @@ public class Mapa {
 
         for (int i = 0; i < negocios.length; i++) {
             if (negocios[i].colisionaCon(jugador)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    public boolean colisionaProyectil(Proyectil proyectil) {
+
+        for (int i = 0; i < casas.length; i++) {
+            if (Math.abs(casas[i].getX() - proyectil.getX()) <= 18 && Math.abs(casas[i].getY() - proyectil.getY()) <= 18) {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < negocios.length; i++) {
+            if (Math.abs(negocios[i].getX() - proyectil.getX()) <= 18 && Math.abs(negocios[i].getY() - proyectil.getY()) <= 18) {
                 return true;
             }
         }
