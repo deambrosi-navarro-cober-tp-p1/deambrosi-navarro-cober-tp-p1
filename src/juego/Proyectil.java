@@ -11,6 +11,8 @@ public class Proyectil {
     private char direccion;
     private double velocidad = 6;
     private boolean activo = true;
+    private double ancho = 10;
+    private double alto = 10;
 
     public Proyectil(double x, double y, char direccion) {
         this.x = x;
@@ -32,8 +34,24 @@ public class Proyectil {
 
     public void dibujar(Entorno entorno) {
         if (activo) {
-            entorno.dibujarCirculo(x, y, 10, Color.YELLOW);
+            entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.YELLOW);
         }
+    }
+
+    public double bordeSuperior() {
+        return y - alto / 2;
+    }
+
+    public double bordeInferior() {
+        return y + alto / 2;
+    }
+
+    public double bordeDerecho() {
+        return x + ancho / 2;
+    }
+
+    public double bordeIzquierdo() {
+        return x - ancho / 2;
     }
 
     public boolean estaFueraDelMapa() {
@@ -41,8 +59,23 @@ public class Proyectil {
     }
 
     public boolean colisionaCon(Enemigo enemigo) {
-        return Math.abs(x - enemigo.getX()) <= 10
-            && Math.abs(y - enemigo.getY()) <= 10;
+        if (bordeDerecho() < enemigo.bordeIzquierdo()) {
+            return false;
+        }
+
+        if (bordeIzquierdo() > enemigo.bordeDerecho()) {
+            return false;
+        }
+
+        if (bordeInferior() < enemigo.bordeSuperior()) {
+            return false;
+        }
+
+        if (bordeSuperior() > enemigo.bordeInferior()) {
+            return false;
+        }
+
+        return true;
     }
 
     public double getX() {

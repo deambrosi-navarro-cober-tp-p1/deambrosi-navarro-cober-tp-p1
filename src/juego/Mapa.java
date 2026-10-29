@@ -57,14 +57,14 @@ public class Mapa {
                 cuadras[indice] = new Cuadra(x, y, 75, 75);
 
                 // Casas
-                casas[indice * 3] = new Casa( x - 32, y - 26, 26, 26,imagenesCasas[(indice * 3) % imagenesCasas.length]);
+                casas[indice * 3] = new Casa( x - 32, y - 26, 58, 58,imagenesCasas[(indice * 3) % imagenesCasas.length]);
 
-                casas[indice * 3 + 1] = new Casa(x + 32, y - 26, 26, 26,imagenesCasas[(indice * 3 + 1) % imagenesCasas.length]);
+                casas[indice * 3 + 1] = new Casa(x + 32, y - 26, 58, 58,imagenesCasas[(indice * 3 + 1) % imagenesCasas.length]);
 
-                casas[indice * 3 + 2] = new Casa(x - 32, y + 26, 26, 26,imagenesCasas[(indice * 3 + 2) % imagenesCasas.length]);
+                casas[indice * 3 + 2] = new Casa(x - 32, y + 26, 58, 58,imagenesCasas[(indice * 3 + 2) % imagenesCasas.length]);
 
                 // Negocios
-                negocios[indice] = new Negocio(x + 32, y + 26, 26, 26,imagenesNegocios[indice]);
+                negocios[indice] = new Negocio(x + 32, y + 26, 58, 58,imagenesNegocios[indice]);
 
                 indice++;
             }
@@ -124,22 +124,24 @@ public class Mapa {
 
         return false;
     }
-    public boolean colisionaProyectil(Proyectil proyectil) {
 
-        for (int i = 0; i < casas.length; i++) {
-            if (Math.abs(casas[i].getX() - proyectil.getX()) <= 18 && Math.abs(casas[i].getY() - proyectil.getY()) <= 18) {
-                return true;
-            }
+public boolean colisionaProyectil(Proyectil proyectil) {
+
+    for (int i = 0; i < casas.length; i++) {
+        if (proyectil.bordeDerecho() >= casas[i].bordeIzquierdo()&& proyectil.bordeIzquierdo() <= casas[i].bordeDerecho()&& proyectil.bordeInferior() >= casas[i].bordeSuperior()&& proyectil.bordeSuperior() <= casas[i].bordeInferior()) {
+            return true;
         }
-
-        for (int i = 0; i < negocios.length; i++) {
-            if (Math.abs(negocios[i].getX() - proyectil.getX()) <= 18 && Math.abs(negocios[i].getY() - proyectil.getY()) <= 18) {
-                return true;
-            }
-        }
-
-        return false;
     }
+
+    for (int i = 0; i < negocios.length; i++) {
+        if (proyectil.bordeDerecho() >= negocios[i].bordeIzquierdo() && proyectil.bordeIzquierdo() <= negocios[i].bordeDerecho()&& proyectil.bordeInferior() >= negocios[i].bordeSuperior()&& proyectil.bordeSuperior() <= negocios[i].bordeInferior()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
     public Casa[] getCasas() {
         return casas;

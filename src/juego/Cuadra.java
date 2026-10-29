@@ -17,7 +17,7 @@ public class Cuadra {
 	}
 	
 	public void dibujarCuadra(Entorno e) {
-		e.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, new Color(105, 135, 85));
+		e.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, new Color(115, 160, 95));
 	}
 	
 	public int bordeSuperior() {

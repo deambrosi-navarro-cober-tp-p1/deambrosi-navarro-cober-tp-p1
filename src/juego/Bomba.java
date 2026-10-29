@@ -71,31 +71,38 @@ public class Bomba {
                 entorno.dibujarRectangulo(x, y, 28, 90, 0, Color.ORANGE);
             }
         }
-        }
+       }
+
     public boolean afectaJugador(Jugador jugador) {
-        if (!exploto || !activa) {
-            return false;
-        }
+    	if (!exploto || !activa) {
+    		return false;
+    	}
 
-        boolean horizontal =
-            Math.abs(jugador.getY() - y) <= 10 && Math.abs(jugador.getX() - x) <= 45;
+    		boolean horizontal = jugador.bordeDerecho() >= x - 45 && jugador.bordeIzquierdo() <= x + 45 && jugador.bordeInferior() >= y - 10 && jugador.bordeSuperior() <= y + 10;
 
-        boolean vertical =
-            Math.abs(jugador.getX() - x) <= 14 && Math.abs(jugador.getY() - y) <= 45;
+    		boolean vertical = jugador.bordeDerecho() >= x - 14 && jugador.bordeIzquierdo() <= x + 14 && jugador.bordeInferior() >= y - 45 && jugador.bordeSuperior() <= y + 45;
 
-        if (esInterseccion) {
-            return horizontal || vertical;
-        }
-
-        return calleHorizontal ? horizontal : vertical;
+    	if (esInterseccion) {
+    		return horizontal || vertical;
     }
+
+    return calleHorizontal ? horizontal : vertical;
+}
+
     public boolean tocaJugador(Jugador jugador) {
-        if (!activa || exploto) {
-            return false;
-        }
+    	if (!activa || exploto) {
+    		return false;
+    	}
 
-        return Math.abs(jugador.getX() - x) <= 12 && Math.abs(jugador.getY() - y) <= 12;
-    }
+    	double puntoX = Math.max(jugador.bordeIzquierdo(),Math.min(x, jugador.bordeDerecho()));
+
+    	double puntoY = Math.max(jugador.bordeSuperior(),Math.min(y, jugador.bordeInferior()));
+
+    	double distanciaX = x - puntoX;
+    	double distanciaY = y - puntoY;
+
+    return distanciaX * distanciaX + distanciaY * distanciaY <= 7 * 7;
+}
 
     public boolean exploto() {
         return exploto;
